@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #4dc22d;
+    max-width: 1200px; // or 960px, based on your design
+  margin: 0 auto;
+  padding: 0 1.5rem; // for mobile spacing
+  width: 100%;
+}
+
+
+
+
+.title {
+  font-size: 4rem;
+  color: #50196e;
+  font-weight: 600;
+}

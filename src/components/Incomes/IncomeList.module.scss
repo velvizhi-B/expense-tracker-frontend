@@ -1,0 +1,180 @@
+.section {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: "Poppins", sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: sans-serif;
+}
+
+h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.addBtnWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.addBtn {
+  padding: 1rem 3rem;
+  background: linear-gradient(to right, #007bff, #3399ff);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(to right, #0056b3, #1e88e5);
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1rem;
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+  overflow-x: auto;
+}
+
+.table th {
+  background-color: #f0f4f8;
+  color: #374151;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+}
+
+.table td {
+  background: #ffffff;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  color: #333;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+
+.table tr:hover td {
+  background-color: #f9fbff;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.editBtn {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #c8e6c9;
+  }
+}
+
+.deleteBtn {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #ffcdd2;
+  }
+}
+
+/* -----------------------------------
+   ✅ Responsive Queries
+----------------------------------- */
+
+@media (max-width: 768px) {
+  .addBtn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.7rem 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  .header h3 {
+    font-size: 1.2rem;
+  }
+
+  .actionButtons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .addBtnWrapper {
+    justify-content: center;
+  }
+
+  .addBtn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.9rem;
+  }
+
+  .editBtn,
+  .deleteBtn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+}

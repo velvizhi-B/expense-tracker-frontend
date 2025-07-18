@@ -1,0 +1,178 @@
+.expenseSection {
+  margin: 2rem auto;
+  font-family: "Poppins", sans-serif;
+  max-width: 1200px;
+  padding: 0 1rem;
+  background-color: #f8f9fa;
+}
+
+.header {
+  margin-bottom: 1.2rem;
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: center;
+
+    @media (min-width: 768px) {
+      text-align: left;
+    }
+  }
+}
+
+.addButtonWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.addButton {
+  padding: 1rem 2.2rem;
+  background: linear-gradient(to right, #2e7d32, #43a047);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(to right, #388e3c, #66bb6a);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+
+  th {
+    background-color: #e3edf9;
+    color: #1f2937;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    border-bottom: 2px solid #cbd5e1;
+  }
+
+  td {
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  tr:hover td {
+    background-color: #f0f4ff;
+    cursor: pointer;
+  }
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  button {
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .editBtn {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+
+    &:hover {
+      background-color: #c8e6c9;
+    }
+  }
+
+  .deleteBtn {
+    background-color: #ffebee;
+    color: #c62828;
+
+    &:hover {
+      background-color: #ffcdd2;
+    }
+  }
+}
+
+/* Modal Reuse (if any) */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: fadeInScale 0.3s ease forwards;
+  overflow: hidden;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 🔁 Responsive Adjustments */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 0.9rem;
+    padding: 0.7rem 0.6rem;
+  }
+
+  .addButton {
+    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .header h3 {
+    font-size: 1.2rem;
+  }
+
+  .actionButtons {
+    justify-content: center;
+  }
+
+  .modal {
+    padding: 1.5rem;
+    width: 95%;
+  }
+}

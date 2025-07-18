@@ -1,0 +1,136 @@
+.summary {
+  padding: 2rem;
+  margin: 1rem;
+  background: linear-gradient(to bottom right, #f3f6fb, #e8f0fc);
+  border-radius: 20px;
+  font-family: "Poppins", sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 200px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out, background 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    p {
+      font-size: 1.4rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+
+    h3 {
+      font-size: 0.95rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.positive {
+  background: #e6f4ea;
+  border-left: 6px solid #28a745;
+
+  p {
+    color: #1e7e34;
+  }
+}
+
+.negative {
+  background: #fcebea;
+  border-left: 6px solid #dc3545;
+
+  p {
+    color: #c82333;
+  }
+}
+
+.alerts {
+  background: #fffbea;
+  padding: 1.25rem 1.75rem;
+  border-left: 6px solid #ffc107;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 0.95rem;
+  color: #7a5d00;
+
+  h4 {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #554400;
+  }
+
+  ul {
+    padding-left: 1.2rem;
+    margin: 0;
+    list-style-type: disc;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+
+    h4 {
+      font-size: 1rem;
+    }
+  }
+}
