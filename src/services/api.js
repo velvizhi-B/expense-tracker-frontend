@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Get the base URL from environment variables
-const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+// const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // ✅ For Vite

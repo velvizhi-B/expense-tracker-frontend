@@ -13,6 +13,7 @@
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
+    padding: 1rem 0.5rem;
   }
 }
 
@@ -25,6 +26,10 @@
 
   &:hover {
     color: #4ea3f1;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
   }
 }
 
@@ -60,7 +65,7 @@
       width: 100%;
     }
   }
- @media (max-width: 768px) {
+  @media (max-width: 768px) {
     display: none;
 
     &.show {
@@ -85,12 +90,11 @@
   @media (max-width: 768px) {
     display: block;
   }
- 
+
   &.open {
     transform: rotate(90deg); // subtle animated effect
   }
 }
-
 
 .right {
   display: flex;
@@ -171,7 +175,6 @@
   }
 }
 
-
 .mobileUserMenu {
   display: none;
 
@@ -204,4 +207,3 @@
     }
   }
 }
-
