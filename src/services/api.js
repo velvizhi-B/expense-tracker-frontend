@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000';
+// Get the base URL from environment variables
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -9,7 +10,7 @@ const api = axios.create({
   },
 });
 
-// Attach token for each request (if exists)
+// Attach token to every request (if exists)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
