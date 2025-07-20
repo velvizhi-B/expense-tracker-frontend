@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import styles from "./ChangePassword.module.scss";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import LoadingOverlay from "../components/common/LoadingOverlay";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -21,8 +23,20 @@ const ChangePassword = () => {
     confirm: false,
   });
 
+  const [pageLoading, setPageLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const { token, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // simulate slight delay to show overlay
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,9 +47,11 @@ const ChangePassword = () => {
     e.preventDefault();
     setMessage("");
     setError("");
+    setButtonLoading(true);
 
     if (formData.new_password !== formData.confirm_new_password) {
       setError("New passwords do not match");
+      setButtonLoading(false);
       return;
     }
 
@@ -54,29 +70,31 @@ const ChangePassword = () => {
       );
 
       setMessage("Password changed successfully!");
+      toast.success("Password changed successfully!");
 
-      // ✅ Clear form
       setFormData({
         current_password: "",
         new_password: "",
         confirm_new_password: "",
       });
 
-      toast.success("Password changed successfully!");
-      // ✅ Logout and redirect
       logout();
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to change password");
-      toast.error("Failed to change password");
+      const errMsg = err.response?.data?.detail || "Failed to change password";
+      setError(errMsg);
+      toast.error(errMsg);
+    } finally {
+      setButtonLoading(false);
     }
   };
+
+  if (pageLoading) return <LoadingOverlay text="Loading Change Password..." />;
 
   return (
     <div className={styles.container}>
       <h2>Change Password</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {/* Current Password */}
         <label>Current Password</label>
         <div className={styles.passwordWrapper}>
           <input
@@ -95,7 +113,7 @@ const ChangePassword = () => {
             {showPassword.current ? <EyeOff size={20} /> : <Eye size={20} />}
           </span>
         </div>
-        {/* New Password */}
+
         <label>New Password</label>
         <div className={styles.passwordWrapper}>
           <input
@@ -114,7 +132,7 @@ const ChangePassword = () => {
             {showPassword.new ? <EyeOff size={20} /> : <Eye size={20} />}
           </span>
         </div>
-        {/* Confirm New Password */}
+
         <label>Confirm New Password</label>
         <div className={styles.passwordWrapper}>
           <input
@@ -133,9 +151,20 @@ const ChangePassword = () => {
             {showPassword.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
           </span>
         </div>
+
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>{error}</p>}
-        <button type="submit">Change Password</button>
+
+        <button type="submit" disabled={buttonLoading}>
+          {buttonLoading ? (
+            <span className={styles.spinnerWrapper}>
+              <LoadingSpinner size="small" text="Changing Password..." color="#fff" />
+              {/* <span className={styles.btnText}>Changing...</span> */}
+            </span>
+          ) : (
+            "Change Password"
+          )}
+        </button>
       </form>
     </div>
   );

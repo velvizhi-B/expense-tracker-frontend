@@ -1,16 +1,18 @@
-// ✅ IncomeList.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import IncomeForm from "./IncomeForm";
 import styles from "./IncomeList.module.scss";
-import ConfirmModal from "../Modals/ConfirmModal"; // update the path based on your folder structure
+import ConfirmModal from "../Modals/ConfirmModal";
+import LoadingSpinner from "../common/LoadingSpinner";
 
-const IncomeList = ({ onAddClick, refreshTrigger }) => {
+const IncomeList = ({ onAddClick, refreshTrigger, setLoading }) => {
   const [incomes, setIncomes] = useState([]);
   const [editIncome, setEditIncome] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [incomeToDelete, setIncomeToDelete] = useState(null);
+  const [loadingEditId, setLoadingEditId] = useState(null);
+  const [loadingDeleteId, setLoadingDeleteId] = useState(null);
 
   useEffect(() => {
     fetchIncomes();
@@ -35,23 +37,42 @@ const IncomeList = ({ onAddClick, refreshTrigger }) => {
       setIncomes(filtered);
     } catch (err) {
       console.error("Error fetching incomes:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (income) => {
-    setEditIncome(income);
-    setShowForm(true);
+  const handleEdit = async (income) => {
+    setLoadingEditId(income.id);
+    setTimeout(() => {
+      setEditIncome(income);
+      setShowForm(true);
+      setLoadingEditId(null);
+    }, 400); // simulate loading delay
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("Delete this income?")) {
-      try {
-        await api.delete(`/incomes/${id}`);
-        fetchIncomes();
-      } catch (err) {
-        console.error("Delete failed:", err);
-      }
+  const handleDeleteClick = (id) => {
+    setIncomeToDelete(id);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    setLoadingDeleteId(incomeToDelete);
+    try {
+      await api.delete(`/incomes/${incomeToDelete}`);
+      fetchIncomes();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setShowConfirm(false);
+      setIncomeToDelete(null);
+      setLoadingDeleteId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    setIncomeToDelete(null);
   };
 
   const handleCloseForm = () => {
@@ -65,43 +86,8 @@ const IncomeList = ({ onAddClick, refreshTrigger }) => {
     setShowForm(false);
   };
 
-  const handleAddClick = () => {
-    setEditIncome(null);
-    setShowForm(true);
-  };
-
-  const handleDeleteClick = (id) => {
-    setIncomeToDelete(id);
-    setShowConfirm(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      await api.delete(`/incomes/${incomeToDelete}`);
-      fetchIncomes();
-    } catch (err) {
-      console.error("Delete failed:", err);
-    } finally {
-      setShowConfirm(false);
-      setIncomeToDelete(null);
-    }
-  };
-
-  const cancelDelete = () => {
-    setShowConfirm(false);
-    setIncomeToDelete(null);
-  };
-
   return (
     <div className={styles.section}>
-      <h2>Incomes</h2>
-
-      <div className={styles.addBtnWrapper}>
-        <button className={styles.addBtn} onClick={handleAddClick}>
-          + Add Income
-        </button>
-      </div>
-
       <div className={styles.header}>
         <h3>Recent Incomes</h3>
       </div>
@@ -125,14 +111,24 @@ const IncomeList = ({ onAddClick, refreshTrigger }) => {
                 <button
                   className={styles.editBtn}
                   onClick={() => handleEdit(item)}
+                  disabled={loadingEditId === item.id}
                 >
-                  Edit
+                  {loadingEditId === item.id ? (
+                    <LoadingSpinner size="16px" color="#fff" />
+                  ) : (
+                    "Edit"
+                  )}
                 </button>
                 <button
                   className={styles.deleteBtn}
                   onClick={() => handleDeleteClick(item.id)}
+                  disabled={loadingDeleteId === item.id}
                 >
-                  Delete
+                  {loadingDeleteId === item.id ? (
+                    <LoadingSpinner size="16px" color="#fff" />
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </td>
             </tr>
@@ -152,11 +148,13 @@ const IncomeList = ({ onAddClick, refreshTrigger }) => {
           </div>
         </div>
       )}
+
       {showConfirm && (
         <ConfirmModal
           message="Are you sure you want to delete this income? This action cannot be undone."
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
+          loading={loadingDeleteId !== null}
         />
       )}
     </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import api from "../../services/api";
 import styles from "./ExpenseForm.module.scss";
 import { toast } from "react-toastify";
-
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const ExpenseForm = ({
   onClose,
@@ -19,41 +19,76 @@ const ExpenseForm = ({
     }
   );
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = () => {
+    const { title, amount, category, expense_date } = formData;
+
+    if (!title.trim() || title.length < 3) {
+      toast.error("Title must be at least 3 characters.");
+      return false;
+    }
+
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      toast.error("Amount must be a positive number.");
+      return false;
+    }
+
+    if (!category.trim()) {
+      toast.error("Category is required.");
+      return false;
+    }
+
+    if (!expense_date) {
+      toast.error("Please select a valid date.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) return;
+
+    setLoading(true);
+
     try {
       if (isEdit && initialData?.id) {
-        await api.put(`/expenses/${initialData.id}`, formData); // ✅ Edit
+        await api.put(`/expenses/${initialData.id}`, formData);
         toast.success("Expense updated successfully");
       } else {
-        await api.post("/expenses", formData); // ✅ Create
+        await api.post("/expenses", formData);
         toast.success("Expense added successfully");
       }
 
-      onSuccess(); // refresh
+      onSuccess();
       onClose();
     } catch (err) {
       toast.error("Something went wrong");
       console.error("Submit failed:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className={styles.backdrop} onClick={onClose}>
+    <div className={styles.backdrop} onClick={loading ? null : onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h3>Add Expense</h3>
+        <h3>{isEdit ? "Edit Expense" : "Add Expense"}</h3>
         <form onSubmit={handleSubmit} className={styles.form}>
           <label>Title</label>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -63,6 +98,7 @@ const ExpenseForm = ({
             type="number"
             value={formData.amount}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -71,6 +107,7 @@ const ExpenseForm = ({
             name="category"
             value={formData.category}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -80,12 +117,22 @@ const ExpenseForm = ({
             type="date"
             value={formData.expense_date}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
           <div className={styles.buttons}>
-            <button type="submit">Save</button>
-            <button type="button" onClick={onClose}>
+            <button type="submit" disabled={loading}>
+              {loading ? (
+                <span className={styles.spinnerWrapper}>
+                  <LoadingSpinner size="small" />
+                  <span>Saving...</span>
+                </span>
+              ) : (
+                "Save"
+              )}
+            </button>
+            <button type="button" onClick={onClose} disabled={loading}>
               Cancel
             </button>
           </div>

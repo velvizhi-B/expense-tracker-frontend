@@ -8,7 +8,8 @@ import { uploadToCloudinary } from "../utils/cloudinary";
 import ConfirmModal from "../components/Modals/ConfirmModal";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
-
+import LoadingOverlay from "../components/common/LoadingOverlay";
+import Spinner from "../components/common/LoadingSpinner"; // if used inside buttons
 
 const Profile = () => {
   const { logout } = useAuth();
@@ -28,11 +29,17 @@ const Profile = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPassword, setShowPassword] = useState({
-  current: false,
-  new: false,
-  confirm: false,
-});
+    current: false,
+    new: false,
+    confirm: false,
+  });
 
+  const [pageLoading, setPageLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState({
+    update: false,
+    password: false,
+    delete: false,
+  });
 
   const navigate = useNavigate();
 
@@ -42,13 +49,14 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
+      setPageLoading(true); // show overlay
       const res = await api.get("/auth/profile");
-      setProfile({ ...res.data, email: res.data.email }); // keep your form state
-
-      setUser(res.data); // ✅ Update global user context — this updates Navbar
+      setProfile({ ...res.data, email: res.data.email });
+      setUser(res.data);
     } catch (err) {
-      console.error("Failed to fetch profile", err);
       toast.error("Failed to fetch profile");
+    } finally {
+      setPageLoading(false); // hide overlay
     }
   };
 
@@ -72,25 +80,34 @@ const Profile = () => {
   };
 
   const handleUpdate = async () => {
+    const phoneRegex = /^\d{10}$/;
+
+    if (!phoneRegex.test(profile.phonenumber)) {
+      toast.error("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     try {
+      setButtonLoading((prev) => ({ ...prev, update: true }));
       await api.put("/auth/update-profile", {
         name: profile.name,
         phonenumber: profile.phonenumber,
         email: profile.email,
         address: profile.address,
-        profileimage: profile.profileimage, // this is the Cloudinary URL
+        profileimage: profile.profileimage,
       });
-
       toast.success("Profile updated successfully");
       setEditing(false);
     } catch (err) {
-      console.error("Update failed", err);
       toast.error("Update failed");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, update: false }));
     }
   };
 
   const handlePasswordChange = async () => {
     try {
+      setButtonLoading((prev) => ({ ...prev, password: true }));
       await api.post("/auth/change-password", {
         old_password: oldPassword,
         new_password: newPassword,
@@ -99,21 +116,24 @@ const Profile = () => {
       toast.success("Password changed. Please login again.");
       navigate("/login");
     } catch (err) {
-      console.error("Password change failed", err);
       toast.error("Password change failed");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, password: false }));
     }
   };
 
   const handleDelete = async () => {
     try {
+      setButtonLoading((prev) => ({ ...prev, delete: true }));
       await api.delete("/auth/delete-account");
       localStorage.removeItem("token");
       toast.success("Your account has been deleted successfully");
       logout();
       navigate("/register");
     } catch (err) {
-      console.error("Account deletion failed", err);
       toast.error("Failed to delete your account");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, delete: false }));
     }
   };
 
@@ -125,6 +145,8 @@ const Profile = () => {
 
   return (
     <div className={styles.profilePage}>
+      {pageLoading && <LoadingOverlay text="Loading Profile..." />}
+
       <div className={styles.card}>
         <img
           src={profile.profileimage || defaultAvatar}
@@ -158,9 +180,16 @@ const Profile = () => {
           <input
             name="phonenumber"
             value={profile.phonenumber}
-            onChange={handleChange}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d{0,10}$/.test(value)) {
+                setProfile((prev) => ({ ...prev, phonenumber: value }));
+              }
+            }}
             disabled={!editing}
+            placeholder="Enter 10-digit number"
           />
+
           <label>Email</label>
           <input value={profile.email} disabled />
 
@@ -173,8 +202,16 @@ const Profile = () => {
           />
 
           {editing ? (
-            <button className={styles.saveBtn} onClick={handleUpdate}>
-              Save
+            <button
+              className={styles.saveBtn}
+              onClick={handleUpdate}
+              disabled={buttonLoading.update}
+            >
+              {buttonLoading.update ? (
+                <Spinner size="small" text="Saving..." />
+              ) : (
+                "Save"
+              )}
             </button>
           ) : (
             <button className={styles.editBtn} onClick={() => setEditing(true)}>
@@ -185,49 +222,56 @@ const Profile = () => {
       </div>
 
       {showPasswordForm && (
-  <div className={styles.card}>
-    <h3>Change Password</h3>
+        <div className={styles.card}>
+          <h3>Change Password</h3>
 
-    <div className={styles.passwordWrapper}>
-      <input
-        type={showPassword.current ? "text" : "password"}
-        placeholder="Old Password"
-        value={oldPassword}
-        onChange={(e) => setOldPassword(e.target.value)}
-      />
-      <span
-        className={styles.eyeIcon}
-        onClick={() =>
-          setShowPassword((prev) => ({ ...prev, current: !prev.current }))
-        }
-      >
-        {showPassword.current ? <EyeOff size={20} /> : <Eye size={20} />}
-      </span>
-    </div>
+          <div className={styles.passwordWrapper}>
+            <input
+              type={showPassword.current ? "text" : "password"}
+              placeholder="Old Password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
+            <span
+              className={styles.eyeIcon}
+              onClick={() =>
+                setShowPassword((prev) => ({ ...prev, current: !prev.current }))
+              }
+            >
+              {showPassword.current ? <EyeOff size={20} /> : <Eye size={20} />}
+            </span>
+          </div>
 
-    <div className={styles.passwordWrapper}>
-      <input
-        type={showPassword.new ? "text" : "password"}
-        placeholder="New Password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-      />
-      <span
-        className={styles.eyeIcon}
-        onClick={() =>
-          setShowPassword((prev) => ({ ...prev, new: !prev.new }))
-        }
-      >
-        {showPassword.new ? <EyeOff size={20} /> : <Eye size={20} />}
-      </span>
-    </div>
+          <div className={styles.passwordWrapper}>
+            <input
+              type={showPassword.new ? "text" : "password"}
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <span
+              className={styles.eyeIcon}
+              onClick={() =>
+                setShowPassword((prev) => ({ ...prev, new: !prev.new }))
+              }
+            >
+              {showPassword.new ? <EyeOff size={20} /> : <Eye size={20} />}
+            </span>
+          </div>
 
-    <button className={styles.saveBtn} onClick={handlePasswordChange}>
-      Update Password
-    </button>
-  </div>
-)}
-
+          <button
+            className={styles.saveBtn}
+            onClick={handlePasswordChange}
+            disabled={buttonLoading.password}
+          >
+            {buttonLoading.password ? (
+              <Spinner size="small" text="Updating Password..." />
+            ) : (
+              "Update Password"
+            )}
+          </button>
+        </div>
+      )}
 
       <div className={styles.actionsCombined}>
         <button
@@ -251,6 +295,7 @@ const Profile = () => {
             message="This action cannot be undone. Your account will be permanently deleted."
             onConfirm={handleDelete}
             onCancel={() => setShowConfirmModal(false)}
+            loading={buttonLoading.delete}
           />
         )}
       </div>

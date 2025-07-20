@@ -1,9 +1,11 @@
-// ✅ BillReminderList.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import BillReminderForm from "./BillReminderForm";
 import styles from "./BillReminderList.module.scss";
-import ConfirmModal from "../Modals/ConfirmModal"; // update the path based on your folder structure
+import ConfirmModal from "../Modals/ConfirmModal";
+import LoadingOverlay from "../common/LoadingOverlay"; // ✅ import
+import LoadingSpinner from "../common/LoadingSpinner";
+import { toast } from "react-toastify";
 
 const BillReminderList = ({ onAddClick, refreshTrigger }) => {
   const [reminders, setReminders] = useState([]);
@@ -12,6 +14,9 @@ const BillReminderList = ({ onAddClick, refreshTrigger }) => {
   const [bills, setBills] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [loading, setLoading] = useState(false); // ✅ loading state
+  const [formLoading, setFormLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchReminders = async () => {
     try {
@@ -35,41 +40,41 @@ const BillReminderList = ({ onAddClick, refreshTrigger }) => {
     }
   };
 
+  const fetchUpcomingBills = async () => {
+    try {
+      const res = await api.get("/bill-reminders");
+      const today = new Date();
+
+      const upcoming = res.data
+        .filter(
+          (item) =>
+            item.status === "pending" && new Date(item.due_date) >= today
+        )
+        .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+
+      setBills(upcoming);
+    } catch (err) {
+      console.error("Error fetching upcoming bills:", err);
+    }
+  };
+
   useEffect(() => {
-    fetchReminders();
-    fetchUpcomingBills();
+    const fetchAll = async () => {
+      const isInit = refreshTrigger === "init";
+
+      if (isInit) setLoading(true);
+
+      await Promise.all([fetchReminders(), fetchUpcomingBills()]);
+
+      if (isInit) setLoading(false);
+    };
+
+    fetchAll();
   }, [refreshTrigger]);
-
-const fetchUpcomingBills = async () => {
-  try {
-    const res = await api.get("/bill-reminders");
-    const today = new Date();
-
-    const upcoming = res.data
-      .filter((item) => item.status === "pending" && new Date(item.due_date) >= today)
-      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date)); // ✅ Sort ascending
-
-    setBills(upcoming);
-  } catch (err) {
-    console.error("Error fetching upcoming bills:", err);
-  }
-};
-
 
   const handleEdit = (reminder) => {
     setEditReminder(reminder);
     setShowForm(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (confirm("Delete this reminder?")) {
-      try {
-        await api.delete(`/bill-reminders/${id}`);
-        fetchReminders();
-      } catch (err) {
-        console.error("Delete failed:", err);
-      }
-    }
   };
 
   const closeEditForm = () => {
@@ -77,9 +82,9 @@ const fetchUpcomingBills = async () => {
     setShowForm(false);
   };
 
-  const handleFormSuccess = () => {
-    fetchReminders();
-    fetchUpcomingBills(); // ✅ add this line
+  const handleFormSuccess = async () => {
+    await fetchReminders();
+    await fetchUpcomingBills();
     setShowForm(false);
   };
 
@@ -90,13 +95,19 @@ const fetchUpcomingBills = async () => {
 
   const confirmDelete = async () => {
     try {
+      setDeleteLoading(true);
       await api.delete(`/bill-reminders/${itemToDelete}`);
-      setShowConfirm(false);
       setItemToDelete(null);
-      fetchReminders(); // ✅ update table view
-      fetchUpcomingBills(); // ✅ update alerts section
+      // toast.success("Deleted successfully");
     } catch (err) {
       console.error("Delete failed:", err);
+      // toast.error("Failed to delete");
+    } finally {
+      // 🔁 Await both fetch calls
+      await fetchReminders();
+      await fetchUpcomingBills();
+      setDeleteLoading(false); // ✅ reset loading state
+      setShowConfirm(false); // ✅ close confirm modal
     }
   };
 
@@ -107,17 +118,28 @@ const fetchUpcomingBills = async () => {
 
   return (
     <div className={styles.section}>
+      {loading && <LoadingOverlay text="Loading Bill Reminders..." />}
+
+      {/* ✅ spinner */}
       <h2>Bill Reminders</h2>
       <div className={styles.addBtnWrapper}>
-        <button className={styles.addBtn} onClick={() => setShowForm(true)}>
-          + Add Reminder
+        <button
+          className={styles.addBtn}
+          onClick={() => setShowForm(true)}
+          disabled={showForm || formLoading} // ✅ Disable during form open or form submitting
+        >
+          {formLoading ? (
+            <>
+              <LoadingSpinner size="small" color="#fff" /> &nbsp; Adding...
+            </>
+          ) : (
+            "+ Add Reminder"
+          )}
         </button>
       </div>
       <div className={styles.header}>
         <h3>Recent Bill Reminders</h3>
-        {/* <button onClick={() => setShowForm(true)}>+ Add Reminder</button> */}
       </div>
-
       <div className={styles.alerts}>
         <h4>🔔 Upcoming/Unpaid Bills</h4>
         {bills.length === 0 ? (
@@ -132,7 +154,6 @@ const fetchUpcomingBills = async () => {
           </ul>
         )}
       </div>
-
       <table className={styles.table}>
         <thead>
           <tr>
@@ -152,30 +173,34 @@ const fetchUpcomingBills = async () => {
               <td>{r.status}</td>
               <td>
                 <button onClick={() => handleEdit(r)}>Edit</button>
-                <button onClick={() => handleDeleteClick(r.id)}>Delete</button>
+                <button
+                  onClick={() => handleDeleteClick(r.id)}
+                  disabled={deleteLoading && itemToDelete === r.id} // Optional: prevent double-click
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
       {showForm && (
         <div className={styles.popupOverlay}>
-          {/* <div className={styles.popupBox}> */}
           <BillReminderForm
             onClose={closeEditForm}
             onSuccess={handleFormSuccess}
             initialData={editReminder}
             isEdit={!!editReminder}
+            setFormLoading={setFormLoading} // ✅ pass loading state
           />
-          {/* </div> */}
         </div>
       )}
       {showConfirm && (
         <ConfirmModal
-          message="This action cannot be undone."
+          message="Do you really want to delete this reminder?"
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
+          loading={deleteLoading}
         />
       )}
     </div>

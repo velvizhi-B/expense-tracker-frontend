@@ -1,24 +1,27 @@
 .backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000; // High z-index to overlay above everything
   padding: 1rem;
 }
 
-.modal {
-  background: white;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 100%;
+.modalBox {
+  position: relative; // ✅ Required for LoadingOverlay
+  background: #fff;
   padding: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  animation: fadeIn 0.3s ease-in-out;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 
 h3 {
   margin: 0 0 0.5rem;
@@ -29,39 +32,65 @@ h3 {
 p {
   font-size: 0.95rem;
   color: #555;
+  margin-top: 0.5rem;
 }
 
-.buttons {
+.modalActions {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
   flex-wrap: wrap;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
 }
 
-.cancel,
-.confirm {
-  padding: 0.6rem 1.4rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.cancel {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.cancel:hover {
-  background-color: #d1d5db;
-}
-
-.confirm {
+.confirmBtn {
   background: linear-gradient(to right, #dc3545, #ff5f5f);
   color: white;
+
+  &:hover {
+    background: linear-gradient(to right, #b02a37, #e94a4a);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
-.confirm:hover {
-  background: linear-gradient(to right, #b02a37, #e94a4a);
+.cancelBtn {
+  background-color: #e5e7eb;
+  color: #374151;
+
+  &:hover {
+    background-color: #d1d5db;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

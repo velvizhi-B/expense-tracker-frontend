@@ -5,16 +5,19 @@ import styles from "./ExpenseList.module.scss";
 import ExpenseForm from "./ExpenseForm";
 import ConfirmModal from "../Modals/ConfirmModal";
 import { toast } from "react-toastify";
+import LoadingSpinner from "../common/LoadingSpinner";
 
-const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
+const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh, onLoad }) => {
   const [expenses, setExpenses] = useState([]);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [loadingActionId, setLoadingActionId] = useState(null); // Edit/Delete loader
+  const [actionType, setActionType] = useState(""); // "edit" or "delete"
+  const [isAddLoading, setIsAddLoading] = useState(false); // Add Expense button loader
 
-  // 👇 Fetch expenses whenever refreshTrigger changes
   useEffect(() => {
     fetchExpenses();
   }, [refreshTrigger]);
@@ -39,7 +42,17 @@ const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
       setExpenses(filtered);
     } catch (err) {
       console.error("Failed to fetch expenses", err);
+    } finally {
+      onLoad && onLoad(); // Notify parent Dashboard
     }
+  };
+
+  const handleAddClick = () => {
+    setIsAddLoading(true);
+    setSelectedExpense(null);
+    setIsEditing(false);
+    setShowForm(true);
+    setTimeout(() => setIsAddLoading(false), 300); // simulate modal open time
   };
 
   const handleEdit = (expense) => {
@@ -55,7 +68,7 @@ const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
   };
 
   const handleFormSuccess = () => {
-    onRefresh(); // ✅ Refresh table + summary
+    onRefresh(); // Refresh table + summary
   };
 
   const handleDeleteClick = (itemId) => {
@@ -64,16 +77,19 @@ const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
   };
 
   const confirmDelete = async () => {
+    setLoadingActionId(itemToDelete);
+    setActionType("delete");
     try {
       await api.delete(`/expenses/${itemToDelete}`);
       toast.success("Expense deleted successfully");
-      onRefresh(); // ✅ Refresh both
+      onRefresh();
     } catch (err) {
       toast.error("Failed to delete expense");
       console.error("Delete error:", err);
     } finally {
-      setShowConfirm(false);
+      setLoadingActionId(null);
       setItemToDelete(null);
+      setShowConfirm(false);
     }
   };
 
@@ -85,8 +101,8 @@ const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
   return (
     <div className={styles.expenseSection}>
       <div className={styles.addButtonWrapper}>
-        <button className={styles.addButton} onClick={onAddClick}>
-          + Add Expense
+        <button className={styles.addButton} onClick={handleAddClick} disabled={isAddLoading}>
+          {isAddLoading ? <LoadingSpinner size="small" text="Opening..." /> : "+ Add Expense"}
         </button>
       </div>
 
@@ -115,15 +131,30 @@ const ExpenseList = ({ onAddClick, refreshTrigger, onRefresh }) => {
                 <div className={styles.actionButtons}>
                   <button
                     className={styles.editBtn}
-                    onClick={() => handleEdit(item)}
+                    onClick={() => {
+                      setLoadingActionId(item.id);
+                      setActionType("edit");
+                      handleEdit(item);
+                      setLoadingActionId(null);
+                    }}
+                    disabled={loadingActionId === item.id}
                   >
-                    Edit
+                    {loadingActionId === item.id && actionType === "edit" ? (
+                      <LoadingSpinner size="small" />
+                    ) : (
+                      "Edit"
+                    )}
                   </button>
                   <button
                     className={styles.deleteBtn}
                     onClick={() => handleDeleteClick(item.id)}
+                    disabled={loadingActionId === item.id}
                   >
-                    Delete
+                    {loadingActionId === item.id && actionType === "delete" ? (
+                      <LoadingSpinner size="small" />
+                    ) : (
+                      "Delete"
+                    )}
                   </button>
                 </div>
               </td>

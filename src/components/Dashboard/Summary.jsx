@@ -2,25 +2,40 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import styles from "./Summary.module.scss";
 
-const Summary = ({ refreshTrigger }) => {
+const Summary = ({ refreshTrigger, onLoad }) => {
   const [summary, setSummary] = useState({
     total_income: 0,
     total_expenses: 0,
     remaining_balance: 0,
   });
 
-  useEffect(() => {
-    fetchSummary();
-  }, [refreshTrigger]);
+  // useEffect(() => {
+  //   fetchSummary();
+  // }, [refreshTrigger]);
 
+  // const fetchSummary = async () => {
+  //   try {
+  //     const res = await api.get("/summary/");
+  //     setSummary(res.data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch summary", err);
+  //   }
+  // };
+
+  useEffect(() => {
   const fetchSummary = async () => {
     try {
-      const res = await api.get("/summary/");
+      const res = await api.get("/summary");
       setSummary(res.data);
     } catch (err) {
-      console.error("Failed to fetch summary", err);
+      console.error(err);
+    } finally {
+      onLoad && onLoad(); // ✅ Notify parent Dashboard
     }
   };
+
+  fetchSummary();
+}, [refreshTrigger]);
 
   return (
     <div className={styles.summary}>

@@ -31,20 +31,47 @@ h2 {
   margin-bottom: 2rem;
 }
 
+// .addBtn {
+//   padding: 1rem 3rem;
+//   background: linear-gradient(to right, #007bff, #3399ff);
+//   color: white;
+//   font-size: 1.2rem;
+//   font-weight: 600;
+//   border: none;
+//   border-radius: 8px;
+//   cursor: pointer;
+//   transition: background 0.3s ease;
+
+//   &:hover {
+//     background: linear-gradient(to right, #0056b3, #1e88e5);
+//   }
+// }
+
 .addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; // space between spinner and text
   padding: 1rem 3rem;
-  background: linear-gradient(to right, #007bff, #3399ff);
-  color: white;
   font-size: 1.2rem;
   font-weight: 600;
+  background: linear-gradient(to right, #007bff, #3399ff);
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s;
 
-  &:hover {
-    background: linear-gradient(to right, #0056b3, #1e88e5);
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
   }
+}
+
+.btnContent {
+  display: flex;
+  align-items: center;
+  gap: 8px; // ensures left-aligned spinner, right-aligned text
 }
 
 .header {
@@ -95,6 +122,10 @@ h2 {
 }
 
 .editBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background-color: #e8f5e9;
   color: #2e7d32;
   padding: 0.4rem 0.9rem;
@@ -111,6 +142,10 @@ h2 {
 }
 
 .deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background-color: #ffebee;
   color: #c62828;
   padding: 0.4rem 0.9rem;

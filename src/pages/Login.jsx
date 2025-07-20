@@ -4,29 +4,30 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // 👁️ toggle
+  const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErr('');
+    setLoading(true);
 
     try {
       const response = await api.post('/auth/login', { email, password });
       const token = response.data.access_token;
-
       localStorage.setItem('token', token);
       login(token);
       navigate('/dashboard');
     } catch (error) {
       const errorData = error?.response?.data;
-
       if (Array.isArray(errorData?.detail)) {
         const messages = errorData.detail.map((e) => e.msg).join(', ');
         setErr(messages);
@@ -35,6 +36,8 @@ function Login() {
       } else {
         setErr('Login failed. Please try again.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,9 +76,11 @@ function Login() {
 
           {err && <p className={styles.errorMessage}>{err}</p>}
 
-          <button type="submit" className={styles.button}>
-            Login
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
           </button>
+
+          {loading && <LoadingSpinner text="Authenticating..." />}
         </form>
       </div>
     </div>

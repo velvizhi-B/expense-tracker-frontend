@@ -96,12 +96,14 @@ function Register() {
           <input
             type="text"
             name="phonenumber"
+            placeholder="Enter 10-digit number"
             className={styles.input}
             value={formData.phonenumber}
             onChange={handleChange}
             required
             maxLength="10"
           />
+          
         </div>
 
         {/* Email */}

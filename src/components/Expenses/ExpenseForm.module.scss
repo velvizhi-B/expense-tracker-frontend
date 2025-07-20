@@ -34,6 +34,14 @@
   }
 }
 
+.spinnerWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+
 input,
 select,
 textarea {
@@ -126,3 +134,4 @@ button[type="button"] {
     }
   }
 }
+
